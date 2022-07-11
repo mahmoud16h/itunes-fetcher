@@ -13,7 +13,7 @@ const App = () => {
     const [showScrollUp, setShowScrollUp] = useState<boolean>(false)
     const [page, setPage] = useState<number>(1)
 
-    const {records, isLoading, nextPage, reset} = useRecordSearch(query)
+    const {records, isLoading, nextPage, reset, error} = useRecordSearch(query)
 
     const handleReset = () => {
         reset()
@@ -25,7 +25,7 @@ const App = () => {
         setPage(1)
     }
 
-    const handleScroll = (e: React.UIEvent ) => {
+    const handleScroll = async (e: React.UIEvent ) => {
         const { scrollHeight, scrollTop, clientHeight } = e.target as HTMLDivElement
         const bottom = Math.floor(scrollHeight - scrollTop) === Math.floor(clientHeight);
 
@@ -34,8 +34,11 @@ const App = () => {
         }
 
         if (bottom && !isLoading) {
-            nextPage(page)
-            setPage(prev => prev + 1)
+            const response = await nextPage(page)
+
+            if (response.meta.requestStatus !== 'rejected') {
+                setPage(prev => prev + 1)
+            }
         }
     }
 
@@ -45,17 +48,21 @@ const App = () => {
 
     return (
         <AppContainer ref={containerRef} onScroll={handleScroll}>
-            <Text type={TextType.L}>Search music</Text>
-            <Input value={query} onChange={handleInput} />
-            <button onClick={handleReset}>Clear</button>
+            <>
+                <Text type={TextType.L}>Search music</Text>
+                <Input value={query} onChange={handleInput} />
+                {error && <Text type={TextType.S} color="red">Error fetching data.</Text>}
+                <button onClick={handleReset}>Clear</button>
+            </>
+
             <Records records={records} />
+
             <>
                 {query.length > 2 && !isLoading && !records.length && <Text type={TextType.XL}>There are no results</Text>}
                 {isLoading &&  <Spinner/>}
             </>
-            {showScrollUp && <ScrollToTop onClick={scrollToTop}>
-                <Text type={TextType.S}>Top</Text>
-            </ScrollToTop>}
+
+            {showScrollUp && <ScrollToTop onClick={scrollToTop}><Text type={TextType.S}>Top</Text></ScrollToTop>}
         </AppContainer>
     )
 }

@@ -3,7 +3,7 @@ import React from "react";
 
 const Records: React.FC<{ records: RecordType[]}> = ({ records }) => (
     <>
-        {records.map((rec) => <RecordCard record={rec}/>)}
+        {records.map((rec, key) => <RecordCard key={key} record={rec}/>)}
     </>
 )
 
