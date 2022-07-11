@@ -25,11 +25,13 @@ export const recordsSlice = createSlice({
     extraReducers: (builder) => {
         builder.addCase(fetchRecords.pending, (state) => {
             state.loading = true
+            state.error = ""
         })
         builder.addCase(fetchRecords.fulfilled, (state, action) => {
             const { meta: { arg: { page } } } = action;
             state.recordList = page && page > 0 ? [...state.recordList, ...action.payload.results] : action.payload.results
             state.loading = false
+            state.error = ""
         })
         builder.addCase(fetchRecords.rejected, (state) => {
             state.loading = false
